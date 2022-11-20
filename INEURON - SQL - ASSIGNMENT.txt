@@ -1,0 +1,191 @@
+
+
+CREATE  WAREHOUSE CH_ASSIGNMENT
+SHOW WAREHOUSES
+USE WAREHOUSE CH_ASSIGNMENT
+USE  CH_DATABASE
+
+-------------------------------TASK1--------------------------
+
+
+CREATE OR REPLACE TABLE CH_Shopping_history
+( 
+  product varchar not null,
+  quantity integer not null,
+  unit_price integer not null
+)
+
+INSERT INTO CH_Shopping_history(product,quantity,unit_price)values('milk', 3, 10)
+INSERT INTO CH_Shopping_history(product,quantity,unit_price)values('bread', 7, 3)
+INSERT INTO CH_Shopping_history(product,quantity,unit_price)values('bread', 5, 10)
+INSERT INTO CH_Shopping_history(product,quantity,unit_price)values('chocolate', 5, 10)
+INSERT INTO CH_Shopping_history(product,quantity,unit_price)values('sweet', 6, 50)
+INSERT INTO CH_Shopping_history(product,quantity,unit_price)values('sugar', 3, 10)
+INSERT INTO CH_Shopping_history(product,quantity,unit_price)values('rice', 15, 60)
+INSERT INTO CH_Shopping_history(product,quantity,unit_price)values('oil', 3, 100)
+INSERT INTO CH_Shopping_history(product,quantity,unit_price)values('fruits', 5, 10)
+INSERT INTO CH_Shopping_history(product,quantity,unit_price)values('vegetables', 5, 10)
+
+
+SELECT * FROM CH_Shopping_history
+
+SELECT product, SUM(quantity * unit_price) AS TOTAL_PRICE 
+FROM CH_Shopping_history
+GROUP BY PRODUCT
+ORDER BY 1 DESC
+
+
+-------------------------------------------------- TASK 2--------------------------------------
+
+CREATE OR REPLACE TABLE PHONES
+(name varchar(20) not null unique,
+ phone_number integer not null unique
+);
+
+INSERT INTO PHONES(name,phone_number)values('jack',1234)
+INSERT INTO PHONES(name,phone_number)values('lena',3333)
+INSERT INTO PHONES(name,phone_number)values('mark',9999)
+INSERT INTO PHONES(name,phone_number)values('anna',7582)
+
+SELECT * FROM PHONES
+
+CREATE OR REPLACE TABLE CALLS
+(id integer not null,
+ caller integer not null,
+ callee integer not null,
+ duration integer not null,
+ unique(id))
+ 
+INSERT INTO CALLS VALUES (25,1234,7582,8),(7,9999,7582,1),(18,9999,3333,4),(2,7582,3333,3),(3,3333,1234,1),(21,3333,1234,1);
+
+ 
+SELECT * FROM CALLS
+
+
+SELECT NAME FROM
+(SELECT P.NAME, SUM(C.DURATION) AS TOTAL_DURATION FROM PHONES P
+INNER JOIN CALLS C
+ON P.PHONE_NUMBER = C.CALLER GROUP BY NAME
+UNION 
+SELECT P.NAME, SUM(C.DURATION) AS TOTAL_DURATION FROM PHONES P
+INNER JOIN  CALLS C
+ON P.PHONE_NUMBER = C.CALLEE GROUP BY NAME) AS OUTPUT_TABLE GROUP BY NAME
+HAVING  SUM(TOTAL_DURATION) >= 10 
+ORDER BY NAME
+
+_______________________  A TEST CASE FROM  TASK 2 -----------------
+
+CREATE OR REPLACE TABLE PHONES_TESTCASE
+(name varchar(20) not null unique,
+ phone_number integer not null unique
+);
+
+INSERT INTO PHONES_TESTCASE(name,phone_number)values('john',6356), ('Addison',4315),('Kate',8003),('Ginny',9831);
+
+SELECT * FROM PHONES_TESTCASE
+
+CREATE OR REPLACE TABLE CALLS_TESTCASE
+(id integer not null,
+ caller integer not null,
+ callee integer not null,
+ duration integer not null)
+ 
+INSERT INTO CALLS_TESTCASE VALUES (65,8003,9831,7),(100,9831,8003,3),(145,4315,9831,18);
+
+ 
+ SELECT * FROM PHONES_TESTCASE
+ SELECT * FROM CALLS_TESTCASE
+
+SELECT NAME FROM
+(SELECT P.NAME, SUM(C.DURATION) AS TOTAL_DURATION FROM PHONES_TESTCASE P
+INNER JOIN CALLS_TESTCASE C
+ON P.PHONE_NUMBER = C.CALLER GROUP BY NAME
+UNION 
+SELECT P.NAME, SUM(C.DURATION) AS TOTAL_DURATION FROM PHONES_TESTCASE P
+INNER JOIN CALLS_TESTCASE C
+ON P.PHONE_NUMBER = C.CALLEE GROUP BY NAME) AS OUTPUT_TABLE 
+GROUP  BY NAME
+HAVING SUM(TOTAL_DURATION) >= 10
+ORDER BY NAME
+ 
+ 
+ 
+----------------------------------------------------------   TASK - 3 ---------------------------------------------
+ 
+CREATE OR REPLACE TABLE TRANSACTIONS(
+    AMOUNT INTEGER NOT NULL,
+    DATE DATE NOT NULL
+);
+
+INSERT INTO TRANSACTIONS VALUES (1000,'2020-01-06'),(-10,'2020-01-14'),(-75,'2020-01-20'),(-5,'2020-01-25'),(-4,'2020-01-29'),(2000,'2020-03-10'),
+(-75,'2020-03-12'),(-20,'2020-03-15'),(40,'2020-03-15'),(-50,'2020-03-17'),(200,'2020-10-10'),(-200,'2020-10-10');
+
+ SELECT * FROM TRANSACTIONS
+ 
+ SELECT COUNT(AMOUNT) FROM TRANSACTIONS--
+
+
+WITH FINAL_BALANCE AS (SELECT SUM(AMOUNT) AS TOTAL_TRANSACTIONS,COUNT(AMOUNT) AS NO_OF_TRANSACTIONS
+FROM TRANSACTIONS
+WHERE AMOUNT<0
+GROUP BY YEAR(DATE),MONTH(DATE)
+HAVING TOTAL_TRANSACTIONS <=-100 AND NO_OF_TRANSACTIONS >=3)
+SELECT SUM(AMOUNT)-(5*(12-(SELECT COUNT(*) FROM FINAL_BALANCE))) AS BALANCE FROM TRANSACTIONS;
+
+
+
+_________________________________ TEST CASE 1 OF TASK 3______________
+
+CREATE OR REPLACE TABLE TRANSACTIONS_TESTCASE2(
+    AMOUNT INTEGER NOT NULL,
+    DATE DATE NOT NULL
+);
+
+
+INSERT INTO TRANSACTIONS_TESTCASE2 VALUES (1,'2020-06-29'),
+(35,'2020-02-20'),
+(-50,'2020-02-03'),
+(-1,'2020-02-26'),
+(-200,'2020-08-01'),
+(-44,'2020-02-07'),
+(-5,'2020-02-25'),
+(1,'2020-06-29'),
+(1,'2020-06-29'),
+(-100,'2020-12-29'),
+(-100,'2020-12-30'),
+(-100,'2020-12-31');
+
+
+SELECT * FROM TRANSACTIONS_TESTCASE2
+
+
+WITH FINAL_BALANCE AS (SELECT SUM(AMOUNT) AS TOTAL_TRANSACTIONS,COUNT(AMOUNT) AS NO_OF_TRANSACTIONS
+FROM TRANSACTIONS_TESTCASE2
+WHERE AMOUNT<0
+GROUP BY YEAR(DATE),MONTH(DATE)
+HAVING TOTAL_TRANSACTIONS <=-100 AND NO_OF_TRANSACTIONS >=3)
+SELECT SUM(AMOUNT)-(5*(12-(SELECT COUNT(*) FROM FINAL_BALANCE))) AS BALANCE FROM TRANSACTIONS_TESTCASE2;
+
+
+------------------------------- TEST CASE 2  OF TASK 3--------------------------
+CREATE OR REPLACE TABLE TRANSACTIONS_TESTCASE3(
+    AMOUNT INTEGER NOT NULL,
+    DATE DATE NOT NULL
+);
+
+
+INSERT INTO TRANSACTIONS_TESTCASE3 VALUES (6000,'2020-04-03'),
+(5000,'2020-04-02'),
+(4000,'2020-04-01'),
+(3000,'2020-03-01'),
+(2000,'2020-02-01'),
+(1000,'2020-01-01');
+
+SELECT * FROM TRANSACTIONS_TESTCASE3
+
+WITH FINAL_BALANCE AS (SELECT SUM(AMOUNT) AS TOTAL_TRANSACTIONS,COUNT(AMOUNT) AS NO_OF_TRANSACTIONS
+FROM TRANSACTIONS_TESTCASE3
+WHERE AMOUNT<0
+GROUP BY YEAR(DATE),MONTH(DATE)
+HAVING TOTAL_TRANSACTIONS <=-100 AND NO_OF_TRANSACTIONS >=3)
+SELECT SUM(AMOUNT)-(5*(12-(SELECT COUNT(*) FROM FINAL_BALANCE))) AS BALANCE FROM TRANSACTIONS_TESTCASE3;
